@@ -1,12 +1,22 @@
 <template>
-  <div class="container">
-    <div class="inningBox"><h1>Current Inning: {{ currentInning }}</h1></div>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="inningBox">
+                    <h1>Current Inning: {{ currentInning }}</h1>
+                </div>
+            
+                <div class="current-batter">
+                    <h4>Current Batter: {{ currentBatter }}</h4>
+                </div>
+            </div>
+        </div>
     <div class="scoreboard">
-      
       <table class="table">
         <thead>
           <th style="background-color: black"></th>
           <th v-for="item in 9" :key="item">{{ item  }}</th>
+          <td>Score</td>
         </thead>
         <tbody>
           <td>Away</td>
@@ -19,6 +29,7 @@
           <td v-bind:class="{ active: this.inning === 12 }">{{ score[12] }}</td>
           <td v-bind:class="{ active: this.inning === 14 }">{{ score[14] }}</td>
           <td v-bind:class="{ active: this.inning === 16 }">{{ score[16] }}</td>
+          <td>{{ awayScore }}</td>
         </tbody>
         <tbody>
           <td>Home</td>
@@ -31,6 +42,7 @@
           <td v-bind:class="{ active: this.inning === 13 }">{{ score[13] }}</td>
           <td v-bind:class="{ active: this.inning === 15 }">{{ score[15] }}</td>
           <td v-bind:class="{ active: this.inning === 17 }">{{ score[17] }}</td>
+          <td>{{ homeScore }}</td>
         </tbody>
       </table>
     </div>
@@ -70,15 +82,152 @@ export default {
             inning: 0,
             score: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
             inningScore: 0,
+            awayScoreData: 0,
+            homeScoreData: 0,
             outcome: [],
             firstBase: false,
             secondBase: false,
-            thirdBase: false
+            thirdBase: false,
+            homeBatter: 0,
+            awayBatter: 0,
+
+            homeTeam: [
+                {
+                    pos: "SS",
+                    name: "Luke Appling01",
+                    avg: 3
+                },
+
+                {
+                    pos: "1B",
+                    name: "Lou Gehrig02",
+                    avg: 5
+                },
+
+                {
+                    pos: "OF",
+                    name: "Hank Aaron03",
+                    avg: 3
+                },
+
+                {
+                    pos: "DH",
+                    name: "David Ortiz04",
+                    avg: 4
+                },
+
+                {
+                    pos: "OF",
+                    name: "Babe Ruth05",
+                    avg: 5
+                },
+
+                {
+                    pos: "2B",
+                    name: "Rod Carew06",
+                    avg: 3
+                },
+
+                {
+                    pos: "3B",
+                    name: "George Brett07",
+                    avg: 4
+                },
+
+                {
+                    pos: "OF",
+                    name: "Mickey Mantle08",
+                    avg: 5
+                },
+
+                {
+                    pos: "C",
+                    name: "Carlton Fisk09",
+                    avg: 4
+                },
+            ],
+
+            awayTeam: [
+                {
+                    pos: "SS",
+                    name: "Luke Appling2",
+                    avg: 3
+                },
+
+                {
+                    pos: "1B",
+                    name: "Lou Gehrig2",
+                    avg: 5
+                },
+
+                {
+                    pos: "OF",
+                    name: "Hank Aaron2",
+                    avg: 3
+                },
+
+                {
+                    pos: "DH",
+                    name: "David Ortiz2",
+                    avg: 4
+                },
+
+                {
+                    pos: "OF",
+                    name: "Babe Ruth2",
+                    avg: 5
+                },
+
+                {
+                    pos: "2B",
+                    name: "Rod Carew2",
+                    avg: 3
+                },
+
+                {
+                    pos: "3B",
+                    name: "George Brett2",
+                    avg: 4
+                },
+
+                {
+                    pos: "OF",
+                    name: "Mickey Mantle2",
+                    avg: 5
+                },
+
+                {
+                    pos: "C",
+                    name: "Carlton Fisk2",
+                    avg: 4
+                },
+            ]
         }},
 
     computed: {
         currentInning() {
             return Math.floor(this.inning/2 + 1);
+        },
+
+        currentBatter() {
+            if(this.inning === 0 || this.inning % 2 === 0) {
+                return this.awayTeam[this.awayBatter]['name'];
+            } else {
+                return this.homeTeam[this.homeBatter]['name'];
+            }
+        },
+
+        awayScore() {
+
+            return (this.score[0] + this.score[2] + this.score[4] + this.score[6] + this.score[8] + this.score[10] + this.score[12] + this.score[14] + this.score[16])
+            
+            // eslint-disable-next-line
+            console.log("shoop");
+        },
+
+        homeScore() {
+            
+            return this.score[1] + this.score[3] + this.score[5] + this.score[7] + this.score[9] + this.score[11] + this.score[13] + this.score[15] + this.score[17];
         }
     },
     
@@ -109,7 +258,7 @@ export default {
                 
                 this.foulBall();
                 
-            } else if (number > 82 && number <= 89) {
+            } else if (number > 82 && number <= 90) {
             
                 this.single();
             
@@ -133,9 +282,11 @@ export default {
             this.outcome.push("Strike " + this.strikes + "!");
             
             if(this.strikes === 3) {
+                this.outcome.push("YOU'RE OUT!!")
                 this.strikes = 0;
                 this.outs +=1;
                 if (this.outs === 3) {
+                    this.nextBatter();
                     this.nextInning();
                 } else {
                     this.nextBatter();
@@ -148,7 +299,17 @@ export default {
             this.outcome.push("Ball " + this.balls + "!");
 
             if (this.balls === 4) {
-                this.advanceRunners();
+                if (this.firstBase) {
+                    if (this.secondBase) {
+                        if (this.thirdBase) {
+                            this.addRun();
+                        }
+                        this.thirdBase = true;
+                    }
+                    this.secondBase = true;
+                }
+
+                this.firstBase = true;
 
                 this.nextBatter();
             }
@@ -160,6 +321,28 @@ export default {
             if (this.strikes < 2) {
                 this.strikes += 1;
             }
+        },
+
+        flyOut() {
+            this.outcome.push("Fly Out!");
+
+
+            if (this.outs < 2) {
+                this.outs += 1;
+                this.nextBatter();
+            }
+
+            this.nextInning();
+        },
+
+        groundOut() {
+            this.outcome.push("Fly Out!");
+
+            if (this.outs < 2) {
+                this.outs += 1;
+            }
+
+            this.nextInning();
         },
 
         single() {
@@ -268,39 +451,27 @@ export default {
             this.secondBase = false;
             this.thirdBase = false;
         },
+        
         nextBatter() {
             this.balls = 0;
             this.strikes = 0;
+            this.outcome.push("------NEW BATTER------");
+
+            if(this.inning === 0 || this.inning % 2 === 0) {
+                if(this.awayBatter < 8){
+                    this.awayBatter += 1;
+                } else (this.awayBatter = 0);
+            } else {
+                if(this.homeBatter < 8){
+                    this.homeBatter += 1;
+                } else (this.homeBatter = 0);
+            }
         },
         addRun() {
             this.inningScore += 1;
-            this.score[this.inning] = this.inningScore;
+            this.score[this.inning] +=1;
+            this.outcome.push("RUN SCORES!!")
         },
-        advanceRunners() {
-            if (this.firstBase) {
-                if(this.secondBase) {
-                    if(this.thirdBase) {
-                        // bases loaded
-                        this.firstBase = true;
-                        this.secondBase = true;
-                        this.thirdBase = true;
-
-                        this.addRun();
-                    }
-                    // first and second
-                    this.firstBase = true;
-                    this.secondBase = true;
-                    this.thirdBase = true;
-                }
-
-                // runner on first
-                this.firstBase = true;
-                this.secondBase = true;
-            }
-
-            this.firstBase = true;
-        }
-
 }}
 </script>
 
@@ -359,7 +530,7 @@ export default {
 
 .button:hover {
     cursor: hand;
-    background-color: blue;
+    background-color: black;
 }
 
 button:focus { 
